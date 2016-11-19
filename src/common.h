@@ -1,0 +1,1 @@
+#define CONSOLE_NS_NAME(cls) "PHP\\CLI\\" #cls
