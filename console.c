@@ -23,9 +23,10 @@
 #include "main/php_ini.h"
 // #include "ext/standard/php_string.h"
 // #include "ext/pcre/php_pcre.h"
-// #include "Zend/zend_operators.h"
+#include "Zend/zend_operators.h"
 #include "console.h"
 #include "src/command_line_definition.c"
+#include "src/parameter_definition.c"
 
 // ZEND_DECLARE_MODULE_GLOBALS(console);
 
@@ -38,6 +39,7 @@ PHP_MINIT_FUNCTION(console)
 	// ZEND_INIT_MODULE_GLOBALS(console, php_console_init_globals, NULL);
 
     // Interfaces
+    php_register_parameter_definition();
     // php_ds_register_hashable();
     // php_ds_register_collection();
     // php_ds_register_sequence();

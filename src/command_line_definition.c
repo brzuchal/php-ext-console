@@ -1,46 +1,92 @@
 #include "common.h"
 #include "command_line_definition.h"
 
-zend_class_entry *command_line_definition_ce;
+/* {{{ proto void CommandLineDefinition::__construct(array $definitions)
+   Create the CommandLineDefinition object */
+ZEND_METHOD(CommandLineDefinition, __construct)
+{
+    zval *arr, *entry;
+    zend_string *string_key;
+    zend_ulong  option;
 
-// CommandLineDefinition::hasArgumentDefinition
-// ZEND_BEGIN_ARG_INFO_EX(arginfo_command_line_definition_hasArgumentDefinition, 0, 0, 1)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_command_line_definition_hasArgumentDefinition, 0, 1, _IS_BOOL, NULL, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+    // return_value = getThis();
 
-// CommandLineDefinition::getArgumentDefinition
-// ZEND_BEGIN_ARG_INFO_EX(arginfo_command_line_definition_getArgumentDefinition, 0, 0, 1)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_command_line_definition_getArgumentDefinition, 0, 1, IS_OBJECT, CONSOLE_NS_NAME(ArgumentDefinition), 1)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &arr) == FAILURE) {
+        return;
+    }
 
-// CommandLineDefinition::getArgumentDefinitionAtPosition
-ZEND_BEGIN_ARG_INFO_EX(arginfo_command_line_definition_getArgumentDefinitionAtPosition, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+    ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(arr), option, string_key, entry) {
+        if (string_key) {
+            php_error_docref(NULL, E_WARNING,
+                    "Array keys must be CURLOPT constants or equivalent integer values");
+            RETURN_FALSE;
+        }
+        if (Z_TYPE_P(entry) != IS_OBJECT || !instanceof_function(Z_OBJCE_P(entry), parameter_definition_ce)) {
+            php_error_docref(NULL, E_WARNING,
+                    "Unexpected non parameter definition item given");
+            RETURN_FALSE;
+        }
+    } ZEND_HASH_FOREACH_END();
+    zend_update_property(command_line_definition_ce, getThis(), "definitions", sizeof("definitions")-1, arr);
 
-// CommandLineDefinition::hasOptionDefinition
-ZEND_BEGIN_ARG_INFO_EX(arginfo_command_line_definition_hasOptionDefinition, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+    // zval tmp;
+	// ZVAL_NULL(&tmp);
+	// zend_update_property(command_line_definition_ce, getThis(), "definitions", sizeof("definitions"), &tmp);
 
-// CommandLineDefinition::getOptionDefinition
-ZEND_BEGIN_ARG_INFO_EX(arginfo_command_line_definition_getOptionDefinition, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+    // zval definitions;
+    // array_init(&definitions);
+    // zend_declare_property(command_line_definition_ce, "definitions", sizeof("definitions")-1, &definitions, ZEND_ACC_PROTECTED);
+}
+/* }}} */
+
+/* {{{ proto void CommandLineDefinition::hasArgumentDefinition(string $name) : bool
+   Create the CommandLineDefinition object */
+ZEND_METHOD(CommandLineDefinition, hasArgumentDefinition)
+{
+}
+/* }}} */
+
+/* {{{ proto void CommandLineDefinition::getArgumentDefinition(string $name) : ArgumentDefinition
+   Create the CommandLineDefinition object */
+ZEND_METHOD(CommandLineDefinition, getArgumentDefinition)
+{
+}
+/* }}} */
+
+/* {{{ proto void CommandLineDefinition::getArgumentDefinitionAtPosition(int $position) : ArgumentDefinition
+   Create the CommandLineDefinition object */
+ZEND_METHOD(CommandLineDefinition, getArgumentDefinitionAtPosition)
+{
+}
+/* }}} */
+
+/* {{{ proto void CommandLineDefinition::hasOptionDefinition(string $name) : OptionDefinition
+   Create the CommandLineDefinition object */
+ZEND_METHOD(CommandLineDefinition, hasOptionDefinition)
+{
+}
+/* }}} */
+
+/* {{{ proto void CommandLineDefinition::getOptionDefinition(string $name) : OptionDefinition
+   Create the CommandLineDefinition object */
+ZEND_METHOD(CommandLineDefinition, getOptionDefinition)
+{
+}
+/* }}} */
 
 void php_register_command_line_definition()
 {
     zend_class_entry ce;
     zend_function_entry methods[] = {
-        PHP_ABSTRACT_ME(CommandLineDefinition, hasArgumentDefinition, arginfo_command_line_definition_hasArgumentDefinition)
-        PHP_ABSTRACT_ME(CommandLineDefinition, getArgumentDefinition, arginfo_command_line_definition_getArgumentDefinition)
-        PHP_ABSTRACT_ME(CommandLineDefinition, getArgumentDefinitionAtPosition, arginfo_command_line_definition_getArgumentDefinitionAtPosition)
-        PHP_ABSTRACT_ME(CommandLineDefinition, hasOptionDefinition, arginfo_command_line_definition_hasOptionDefinition)
-        PHP_ABSTRACT_ME(CommandLineDefinition, getOptionDefinition, arginfo_command_line_definition_getOptionDefinition)
+        PHP_ME(CommandLineDefinition, __construct,                     arginfo_command_line_definition___construct,                     ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
+        PHP_ME(CommandLineDefinition, hasArgumentDefinition,           arginfo_command_line_definition_hasArgumentDefinition,           ZEND_ACC_PUBLIC)
+        PHP_ME(CommandLineDefinition, getArgumentDefinition,           arginfo_command_line_definition_getArgumentDefinition,           ZEND_ACC_PUBLIC)
+        PHP_ME(CommandLineDefinition, getArgumentDefinitionAtPosition, arginfo_command_line_definition_getArgumentDefinitionAtPosition, ZEND_ACC_PUBLIC)
+        PHP_ME(CommandLineDefinition, hasOptionDefinition,             arginfo_command_line_definition_hasOptionDefinition,             ZEND_ACC_PUBLIC)
+        PHP_ME(CommandLineDefinition, getOptionDefinition,             arginfo_command_line_definition_getOptionDefinition,             ZEND_ACC_PUBLIC)
         PHP_FE_END
     };
-    INIT_CLASS_ENTRY(ce, "PHP\\CLI\\CommandLineDefinition", methods);
-    command_line_definition_ce = zend_register_internal_interface(&ce);
+    INIT_NS_CLASS_ENTRY(ce, CONSOLE_NS, "CommandLineDefinition", methods);
+    command_line_definition_ce = zend_register_internal_class(&ce);
+    zend_declare_property_null(command_line_definition_ce, "definitions", sizeof("definitions")-1, ZEND_ACC_PROTECTED);
 }

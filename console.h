@@ -17,6 +17,9 @@
 
 extern zend_module_entry console_module_entry;
 
+zend_class_entry *command_line_definition_ce;
+zend_class_entry *parameter_definition_ce;
+
 #define phpext_console_ptr &console_module_entry
 
 /* Replace with version number for your extension */
